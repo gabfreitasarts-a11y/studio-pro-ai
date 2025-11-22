@@ -1,15 +1,17 @@
-// server.js - VERSÃO FINAL CORRIGIDA (LEGENDAS PREMIUM)
+// server.js - VERSÃO FINAL PARA PRODUÇÃO (RENDER & LOCALHOST)
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const port = 3000;
+
+// AQUI ESTÁ A CORREÇÃO DA PORTA PARA O RENDER:
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// --- BANCO DE DADOS (COPYWRITING AVANÇADO & VISUAL LIMPO) ---
+// --- BANCO DE DADOS (COPYWRITING AVANÇADO) ---
 const nicheLibrary = {
     gastronomia: {
         visual: "Professional Food Photography. Delicious food positioned strictly at the BOTTOM HALF. TOP HALF is clean blurred background for text. High contrast.",
@@ -20,7 +22,7 @@ const nicheLibrary = {
             {t:"PROMOÇÃO", s:"IMPERDÍVEL HOJE"}
         ],
         captions: [
-            "🚨 **Alerta de imagens fortes!**\n\nSeus olhos não estão te enganando. Essa é a definição visual de felicidade.\n\nNós não entregamos apenas comida, entregamos uma experiência completa:\n✨ Ingredientes selecionados a dedo.\n🔥 Preparo artesanal com paixão.\n🛵 Entrega rápida para chegar perfeito até você.\n\n👇 **Não passe vontade sozinho(a):**\nMarque nos comentários quem te deve um jantar desses hoje!",
+            "🚨 **Alerta de imagens fortes!** 🚨\n\nSeus olhos não estão te enganando. Essa é a definição visual de felicidade.\n\nNós não entregamos apenas comida, entregamos uma experiência completa:\n✨ Ingredientes selecionados a dedo.\n🔥 Preparo artesanal com paixão.\n🛵 Entrega rápida para chegar perfeito até você.\n\n👇 **Não passe vontade sozinho(a):**\nMarque nos comentários quem te deve um jantar desses hoje!",
             "🍕 **Sextou (ou quase)! E você merece o melhor.**\n\nChega de pedir sempre o mesmo. Permita-se experimentar o verdadeiro sabor que conquista a cidade.\n\n✅ Massa no ponto certo.\n✅ Recheio generoso.\n✅ Sabor inesquecível.\n\n📲 **Clique no link da bio e faça seu pedido agora mesmo!**"
         ],
         tags: "#gastronomia #foodporn #delivery #jantar #comidadeverdade #instafood #chef"
@@ -166,5 +168,5 @@ app.post('/api/generate', async (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`✅ SERVIDOR FINAL (LEGENDAS PREMIUM) RODANDO: http://localhost:${port}`);
+    console.log(`✅ SERVIDOR ONLINE NA PORTA: ${port}`);
 });
