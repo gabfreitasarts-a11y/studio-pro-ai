@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Pro AI - Ultimate</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Dancing+Script:wght@700&family=Montserrat:wght@400;700;900&family=Playfair+Display:ital,wght@0,700;1,700&family=Roboto:wght@400;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="loginOverlay" class="login-screen">
+        <div class="login-box">
+            <div class="login-icon"><i class="fas fa-lock"></i></div>
+            <h2>Studio Pro AI</h2>
+            <p class="subtitle">Acesso Exclusivo</p>
+            <div class="pricing-area">
+                <span class="price">R$ 19,90 <small>/mês</small></span>
+                <a href="https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=fd0c5a62e96c4694816d344b0c191dc0" target="_blank" class="btn-mercado-pago">
+                    Assinar e Liberar Acesso
+                </a>
+                <p class="info-text">Senha enviada após confirmação.</p>
+            </div>
+            <div class="access-area">
+                <label>Código de Acesso:</label>
+                <div class="input-wrapper">
+                    <input type="password" id="passwordInput" placeholder="Insira sua chave">
+                    <button onclick="checkPassword()" class="btn-unlock"><i class="fas fa-arrow-right"></i></button>
+                </div>
+                <p id="errorMsg" class="error-msg hidden">Código inválido!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container hidden" id="appContainer">
+        <aside class="sidebar">
+            <div class="logo-area">
+                <h2>🎨 Studio Pro</h2>
+                <p>AI Design Engine</p>
+            </div>
+            <form id="generatorForm">
+                <div class="form-group">
+                    <label>@ da Marca</label>
+                    <input type="text" id="handle" required>
+                </div>
+                <div class="form-group highlight-box">
+                    <label><i class="fas fa-briefcase"></i> Nicho</label>
+                    <select id="nicheSelector">
+                        <option value="gastronomia">🍕 Gastronomia</option>
+                        <option value="barbearia">💈 Barbearia</option>
+                        <option value="advocacia">⚖️ Advocacia</option>
+                        <option value="saude">🌿 Saúde/Bem-estar</option>
+                        <option value="estetica">💅 Estética</option>
+                        <option value="fitness">💪 Fitness</option>
+                        <option value="tech">🚀 Tecnologia</option>
+                        <option value="imobiliaria">🏡 Imobiliária</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tema</label>
+                    <input type="text" id="keywords" required>
+                </div>
+                <div class="form-group" style="border-top: 1px solid #334155; padding-top: 15px;">
+                    <label><i class="fas fa-font"></i> Fonte</label>
+                    <select id="fontStyle">
+                        <option value="impact">💥 Impacto (Anton)</option>
+                        <option value="modern">🚀 Moderna (Montserrat)</option>
+                        <option value="elegant">🎩 Elegante (Playfair)</option>
+                        <option value="hand">✍️ Manuscrita (Dancing)</option>
+                        <option value="clean">🔹 Clean (Roboto)</option>
+                    </select>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Cor Principal</label>
+                        <input type="color" id="primaryColor" value="#FFD700" style="height: 40px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Fundo/Sombra</label>
+                        <input type="color" id="gradientColor" value="#000000" style="height: 40px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Título (Opcional)</label>
+                    <input type="text" id="titleText" placeholder="Automático">
+                </div>
+                <div class="form-group">
+                    <label>Subtítulo (Opcional)</label>
+                    <input type="text" id="subText" placeholder="Automático">
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Semanas</label>
+                        <input type="number" id="weeks" value="1" min="1" max="4">
+                    </div>
+                    <div class="form-group">
+                        <label>Posts/Semana</label>
+                        <input type="number" id="postsPerWeek" value="1" min="1" max="5">
+                    </div>
+                </div>
+                <button type="submit" id="generateBtn" class="btn-primary">
+                    <span id="btnText">Gerar Artes</span>
+                    <div id="loadingSpinner" class="spinner hidden"></div>
+                </button>
+            </form>
+        </aside>
+        <main class="main-content">
+            <div class="top-bar">
+                <h3>Galeria de Resultados</h3>
+                <button onclick="logout()" class="btn-action btn-copy" style="width: auto; padding: 5px 15px;">Sair</button>
+            </div>
+            <div id="resultsGrid" class="results-grid">
+                <div class="empty-state">
+                    <i class="fas fa-layer-group"></i>
+                    <p>Configure ao lado e gere seus posts.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="font-preload" style="position: absolute; opacity: 0; pointer-events: none;">
+        <span style="font-family: 'Anton';">Load</span>
+        <span style="font-family: 'Montserrat'; font-weight: 700;">Load</span>
+        <span style="font-family: 'Playfair Display';">Load</span>
+        <span style="font-family: 'Dancing Script';">Load</span>
+        <span style="font-family: 'Roboto';">Load</span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
