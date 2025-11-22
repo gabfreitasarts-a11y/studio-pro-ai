@@ -1,4 +1,4 @@
-/* styles.css - VERSÃO FINAL: IMAGEM GIGANTE NO MOBILE */
+/* styles.css - VERSÃO FINAL: MOBILE CORRIGIDO (QUADRADO PERFEITO) */
 
 :root {
     --primary: #6366f1;
@@ -114,10 +114,9 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
 .empty-state { margin-top: 8rem; text-align: center; color: #334155; }
 .empty-state i { font-size: 5rem; margin-bottom: 1.5rem; opacity: 0.8; color: #1e293b; }
 
-/* === RESPONSIVIDADE CELULAR (IMAGEM GIGANTE VERTICAL) === */
+/* === RESPONSIVIDADE CELULAR (AQUI ESTÁ A CORREÇÃO MÁGICA) === */
 @media (max-width: 900px) {
-    
-    /* 1. Configuração da Página: Libera scroll total */
+    /* 1. Libera o Scroll da Página */
     body { 
         height: auto; 
         min-height: 100vh; 
@@ -131,20 +130,18 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
         overflow: visible; 
     }
     
-    /* 2. Menu no Topo */
+    /* 2. Menu no topo */
     .sidebar { 
         width: 100%; 
         height: auto; 
         border-right: none; 
         border-bottom: 1px solid var(--border); 
         padding: 1.5rem; 
-        position: relative; 
-        z-index: 10; 
     }
     
-    /* 3. Área de Conteúdo sem padding lateral (Imersivo) */
+    /* 3. Área de conteúdo */
     .main-content { 
-        padding: 0; 
+        padding: 1rem; 
         height: auto; 
         overflow: visible; 
     }
@@ -152,57 +149,44 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
     .results-grid { 
         display: flex;
         flex-direction: column;
-        gap: 0; /* Sem espaço entre posts no mobile */
+        gap: 40px;
         overflow: visible; 
         height: auto;
-        padding-bottom: 100px; 
+        padding-bottom: 80px; 
     }
 
-    /* 4. CARD FULL WIDTH (Sem bordas laterais) */
+    /* 4. O CARD OCUPA A LARGURA DA TELA */
     .post-card {
         width: 100%;
-        max-width: 100%;
-        margin: 0;
-        border-radius: 0;
-        border: none;
-        border-bottom: 1px solid var(--border);
-        box-shadow: none;
+        max-width: 100%; /* Ocupa a tela toda */
+        margin: 0 auto;
     }
 
-    /* 5. IMAGEM GIGANTE (70% da Altura da Tela) */
+    /* 5. CORREÇÃO DA IMAGEM (O Segredo do Quadrado) */
     .image-container {
         width: 100%;
-        /* Desliga quadrado */
-        aspect-ratio: auto !important; 
-        /* Ocupa 70% da altura da tela do celular */
-        height: 70vh !important; 
-        min-height: 500px !important; 
-        background: #000;
+        /* Isso força a imagem a ser um quadrado baseado na largura da tela do celular */
+        aspect-ratio: 1 / 1 !important; 
+        height: auto !important;       
+        min-height: 0 !important;
     }
     
     .card-image {
         width: 100%;
         height: 100%;
-        /* Garante que preenche tudo (cropando laterais se necessário) */
+        /* Garante que a imagem preencha o quadrado sem deformar */
         object-fit: cover !important; 
     }
 
-    /* Ajuste da Legenda e Botões no Celular */
-    .card-content {
-        padding: 1.5rem;
-        background: var(--surface);
-    }
-
-    /* Ajuste do Esqueleto de Carregamento */
+    /* Ajuste do Skeleton no celular */
     .skeleton-card {
         width: 100%;
-        margin: 0;
-        border-radius: 0;
         max-width: 100%;
         height: auto;
     }
     .skeleton-shimmer {
         width: 100%;
-        height: 70vh !important; /* Mesma altura da imagem final */
+        aspect-ratio: 1 / 1;
+        height: auto !important;
     }
 }
