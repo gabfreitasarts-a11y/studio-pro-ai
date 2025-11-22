@@ -1,4 +1,5 @@
-/* styles.css - VERSÃO FINAL: TAMANHO IDEAL & LAYOUT VERTICAL */
+/* styles.css - VERSÃO FINAL: IMAGEM GIGANTE NO MOBILE */
+
 :root {
     --primary: #6366f1;
     --primary-dark: #4f46e5;
@@ -10,86 +11,198 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+
+/* === TELA DE LOGIN (Fixo em cima de tudo) === */
+.login-screen { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: #020617; z-index: 9999; 
+    display: flex; align-items: center; justify-content: center; 
+    padding: 20px; overflow-y: auto; 
+    background-image: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+}
+.login-box { 
+    background: var(--surface); border: 1px solid var(--border); 
+    padding: 2rem; border-radius: 20px; text-align: center; 
+    width: 100%; max-width: 450px; margin: auto; 
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+}
+.login-icon i { font-size: 3rem; color: var(--primary); margin-bottom: 1rem; }
+.pricing-area { background: rgba(99, 102, 241, 0.1); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--primary); margin: 1.5rem 0; }
+.price { display: block; font-size: 2.5rem; font-weight: 800; color: #fff; }
+.btn-mercado-pago { display: block; width: 100%; padding: 1rem; background: #009EE3; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 1rem; transition: 0.2s; }
+.btn-mercado-pago:hover { background: #0081b9; transform: translateY(-2px); }
+.input-wrapper { display: flex; gap: 10px; margin-top: 5px; }
+.input-wrapper input { flex: 1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: white; }
+.btn-unlock { padding: 0 1.5rem; background: var(--primary); border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 1.2rem; }
+.error-msg { color: #ef4444; margin-top: 10px; font-weight: bold; }
+
+/* === CONFIGURAÇÃO GERAL DESKTOP === */
 body { background-color: var(--bg); color: var(--text); height: 100vh; display: flex; overflow: hidden; }
 .container { display: flex; width: 100%; height: 100%; }
 .hidden { display: none !important; }
 
-/* === LOGIN === */
-.login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #020617; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-.login-box { background: var(--surface); border: 1px solid var(--border); padding: 2.5rem; border-radius: 20px; text-align: center; width: 100%; max-width: 450px; }
-.pricing-area { background: rgba(99, 102, 241, 0.1); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--primary); margin: 1.5rem 0; }
-.btn-mercado-pago { display: block; width: 100%; padding: 1rem; background: #009EE3; color: white; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 1rem; }
-.input-wrapper { display: flex; gap: 10px; margin-top: 5px; }
-.input-wrapper input { flex: 1; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: white; }
-.btn-unlock { padding: 0 1.5rem; background: var(--primary); border: none; border-radius: 8px; color: white; cursor: pointer; }
-
 /* === SIDEBAR === */
 .sidebar { width: 340px; flex-shrink: 0; background-color: var(--surface); padding: 2rem; overflow-y: auto; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
 .logo-area { margin-bottom: 2rem; text-align: center; }
+.logo-area h2 { color: var(--primary); letter-spacing: 1px; margin-bottom: 5px; }
 .form-group { margin-bottom: 1.2rem; }
 .form-group label { display: block; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; }
-.form-group input[type="text"], .form-group input[type="number"], .form-group select { 
-    width: 100%; padding: 0.9rem; border-radius: 8px; border: 1px solid var(--border); 
-    background: var(--bg); color: white; outline: none; 
-}
+.form-group input, .form-group select { width: 100%; padding: 0.9rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: white; outline: none; transition: 0.2s; }
+.form-group input:focus, .form-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+.highlight-box { background: linear-gradient(145deg, rgba(99, 102, 241, 0.1), transparent); padding: 15px; border-radius: 12px; border: 1px solid rgba(99, 102, 241, 0.3); margin-bottom: 1.8rem; }
 
-/* SELETOR DE COR */
-input[type="color"] {
-    -webkit-appearance: none; border: none; width: 100%; height: 50px; padding: 0; 
-    border-radius: 8px; cursor: pointer; overflow: hidden;
-}
+/* Seletor de Cores Corrigido */
+input[type="color"] { -webkit-appearance: none; border: none; width: 100%; height: 50px; padding: 0; border-radius: 8px; cursor: pointer; overflow: hidden; }
 input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
 input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
 
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.btn-primary { width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; margin-top: 1.5rem; }
-.btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+.btn-primary { width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; margin-top: 1.5rem; transition: 0.2s; }
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+.btn-primary:disabled { opacity: 0.7; cursor: wait; }
 
-/* === ÁREA PRINCIPAL (LAYOUT VERTICAL CENTRALIZADO) === */
+/* === ÁREA PRINCIPAL (Grid Vertical) === */
 .main-content { flex: 1; padding: 2rem; display: flex; flex-direction: column; overflow: hidden; background: #0b1120; }
 .top-bar { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+.top-bar h3 { font-size: 1.5rem; font-weight: 400; color: var(--text); margin:0; }
 
 .results-grid { 
-    flex: 1; 
-    overflow-y: auto; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    gap: 40px; /* Espaço entre os posts */
-    padding-bottom: 100px; 
+    flex: 1; overflow-y: auto; 
+    display: flex; flex-direction: column; align-items: center; 
+    gap: 40px; padding-bottom: 100px; padding-right: 10px; 
 }
 
-/* === CARD (TAMANHO CORRIGIDO) === */
+/* === CARD DO POST (Desktop) === */
 .post-card { 
     background: var(--surface); border-radius: 16px; overflow: hidden; 
     border: 1px solid var(--border); display: flex; flex-direction: column; 
     box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
-    width: 100%; 
-    max-width: 450px; /* <--- TAMANHO REDUZIDO AQUI */
-    flex-shrink: 0;
+    width: 100%; max-width: 450px; 
+    flex-shrink: 0; 
 }
 
-.image-container { width: 100%; aspect-ratio: 1 / 1; background: #0f172a; border-bottom: 1px solid var(--border); }
+.image-container { 
+    width: 100%; aspect-ratio: 1 / 1; 
+    background: #0f172a; border-bottom: 1px solid var(--border); 
+    position: relative; 
+}
 .card-image { width: 100%; height: 100%; object-fit: cover; display: block; }
+
 .card-content { padding: 1.5rem; display: flex; flex-direction: column; gap: 20px; }
+.tag-area { display: flex; align-items: center; }
+.engine-tag { background: #0f172a; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; color: #a5b4fc; font-weight: 700; text-transform: uppercase; border: 1px solid var(--border); }
 .caption-box { background: var(--bg); padding: 1.2rem; border-radius: 10px; font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; border: 1px solid var(--border); white-space: pre-wrap; }
 .card-actions { display: grid; grid-template-columns: 1fr 1.5fr; gap: 12px; margin-top: auto; }
-.btn-action { padding: 1rem; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 700; color: white; display: flex; justify-content: center; gap: 8px; }
+.btn-action { padding: 1rem; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 700; color: white; display: flex; justify-content: center; gap: 8px; text-decoration: none; transition: 0.2s; }
 .btn-copy { background: #334155; }
 .btn-download { background: var(--primary); border: none; }
 
-/* === SKELETON (TAMANHO CORRIGIDO) === */
+/* === SKELETON (Animação) === */
 .skeleton-card { 
     background: #1e293b; border-radius: 16px; overflow: hidden; border: 1px solid #334155; 
-    height: 600px; 
-    width: 100%; 
-    max-width: 450px; /* <--- TAMANHO REDUZIDO AQUI TAMBÉM */
-    display: flex; flex-direction: column; position: relative; flex-shrink: 0;
+    height: auto; min-height: 600px; width: 100%; max-width: 450px; 
+    display: flex; flex-direction: column; position: relative; flex-shrink: 0; 
 }
-.skeleton-shimmer { width: 100%; height: 100%; background: #1e293b; background-image: linear-gradient(to right, #1e293b 0%, #334155 20%, #1e293b 40%, #1e293b 100%); background-repeat: no-repeat; background-size: 200% 100%; animation: shimmer 1.5s linear infinite forwards; }
-.skeleton-content { padding: 20px; display: flex; flex-direction: column; height: 100%; justify-content: center; align-items: center; color: #94a3b8; font-weight: 600; position: absolute; top:0; left:0; width:100%; }
+.skeleton-shimmer { width: 100%; height: 450px; background: #1e293b; background-image: linear-gradient(to right, #1e293b 0%, #334155 20%, #1e293b 40%, #1e293b 100%); background-repeat: no-repeat; background-size: 200% 100%; animation: shimmer 1.5s linear infinite forwards; }
+.skeleton-content { padding: 20px; display: flex; flex-direction: column; height: 150px; justify-content: center; align-items: center; color: #94a3b8; font-weight: 600; position: absolute; top:0; left:0; width:100%; }
 .skeleton-content i { font-size: 3rem; margin-bottom: 15px; color: #6366f1; }
 @keyframes shimmer { 0% { background-position: -100% 0; } 100% { background-position: 100% 0; } }
 
-/* Responsividade */
-@media (max-width: 900px) { .container { flex-direction: column; overflow-y: auto; } .sidebar { width: 100%; height: auto; } .results-grid { padding: 20px; } }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #475569; border-radius: 5px; }
+.empty-state { margin-top: 8rem; text-align: center; color: #334155; }
+.empty-state i { font-size: 5rem; margin-bottom: 1.5rem; opacity: 0.8; color: #1e293b; }
+
+/* === RESPONSIVIDADE CELULAR (IMAGEM GIGANTE VERTICAL) === */
+@media (max-width: 900px) {
+    
+    /* 1. Configuração da Página: Libera scroll total */
+    body { 
+        height: auto; 
+        min-height: 100vh; 
+        overflow-y: auto; 
+        display: block; 
+    }
+    
+    .container { 
+        flex-direction: column; 
+        height: auto; 
+        overflow: visible; 
+    }
+    
+    /* 2. Menu no Topo */
+    .sidebar { 
+        width: 100%; 
+        height: auto; 
+        border-right: none; 
+        border-bottom: 1px solid var(--border); 
+        padding: 1.5rem; 
+        position: relative; 
+        z-index: 10; 
+    }
+    
+    /* 3. Área de Conteúdo sem padding lateral (Imersivo) */
+    .main-content { 
+        padding: 0; 
+        height: auto; 
+        overflow: visible; 
+    }
+    
+    .results-grid { 
+        display: flex;
+        flex-direction: column;
+        gap: 0; /* Sem espaço entre posts no mobile */
+        overflow: visible; 
+        height: auto;
+        padding-bottom: 100px; 
+    }
+
+    /* 4. CARD FULL WIDTH (Sem bordas laterais) */
+    .post-card {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        border-radius: 0;
+        border: none;
+        border-bottom: 1px solid var(--border);
+        box-shadow: none;
+    }
+
+    /* 5. IMAGEM GIGANTE (70% da Altura da Tela) */
+    .image-container {
+        width: 100%;
+        /* Desliga quadrado */
+        aspect-ratio: auto !important; 
+        /* Ocupa 70% da altura da tela do celular */
+        height: 70vh !important; 
+        min-height: 500px !important; 
+        background: #000;
+    }
+    
+    .card-image {
+        width: 100%;
+        height: 100%;
+        /* Garante que preenche tudo (cropando laterais se necessário) */
+        object-fit: cover !important; 
+    }
+
+    /* Ajuste da Legenda e Botões no Celular */
+    .card-content {
+        padding: 1.5rem;
+        background: var(--surface);
+    }
+
+    /* Ajuste do Esqueleto de Carregamento */
+    .skeleton-card {
+        width: 100%;
+        margin: 0;
+        border-radius: 0;
+        max-width: 100%;
+        height: auto;
+    }
+    .skeleton-shimmer {
+        width: 100%;
+        height: 70vh !important; /* Mesma altura da imagem final */
+    }
+}
