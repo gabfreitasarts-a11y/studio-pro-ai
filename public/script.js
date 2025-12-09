@@ -1,8 +1,7 @@
-// script.js - VERSÃO ANTI-FALHA (FALLBACK AUTOMÁTICO)
+// script.js - VERSÃO RESTAURADA (COM BASE64)
 
 const ACCESS_PASSWORD = "K92-X4M-PRO-88"; 
 
-// 1. SEGURANÇA
 if(localStorage.getItem('studioProAuth') === 'true') {
     document.getElementById('loginOverlay').classList.add('hidden');
     document.getElementById('appContainer').classList.remove('hidden');
@@ -20,7 +19,6 @@ function checkPassword() {
 
 function logout() { localStorage.removeItem('studioProAuth'); location.reload(); }
 
-// 2. GERADOR
 document.getElementById('generatorForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -29,11 +27,10 @@ document.getElementById('generatorForm').addEventListener('submit', async (e) =>
     const resultsGrid = document.getElementById('resultsGrid');
     
     btn.disabled = true;
-    btnText.textContent = "Processando...";
+    btnText.textContent = "IA Trabalhando...";
     
     if(resultsGrid.querySelector('.empty-state')) resultsGrid.innerHTML = '';
 
-    // Auto-scroll no celular
     if(window.innerWidth < 900) {
         resultsGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -62,6 +59,7 @@ document.getElementById('generatorForm').addEventListener('submit', async (e) =>
         addSkeleton(i); 
 
         try {
+            // Chama o servidor. Ele vai demorar um pouquinho pois está baixando a imagem lá.
             const response = await fetch('/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -70,9 +68,9 @@ document.getElementById('generatorForm').addEventListener('submit', async (e) =>
             const data = await response.json();
 
             if (data.success) {
+                // Quando chega aqui, a imagem já está pronta (Base64)
                 await createCompositePost(data, i, visualOptions);
             } else {
-                // Se o servidor falhar, remove o esqueleto
                 removeSkeleton(i);
             }
         } catch (error) {
@@ -93,11 +91,12 @@ function addSkeleton(index) {
     div.innerHTML = `
         <div class="skeleton-shimmer"></div>
         <div class="skeleton-content">
-            <i class="fas fa-circle-notch fa-spin"></i>
+            <i class="fas fa-magic fa-spin"></i>
             <span>Criando Design ${index}...</span>
         </div>
     `;
     grid.appendChild(div);
+    div.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function removeSkeleton(index) {
@@ -105,7 +104,6 @@ function removeSkeleton(index) {
     if (el) el.remove();
 }
 
-// 3. MONTAGEM (COM SISTEMA ANTI-FALHA)
 async function createCompositePost(data, index, options) {
     const grid = document.getElementById('resultsGrid');
     const canvas = document.createElement('canvas');
@@ -113,64 +111,32 @@ async function createCompositePost(data, index, options) {
     canvas.height = 1080;
     const ctx = canvas.getContext('2d');
 
-    let imageLoaded = false;
     const bgImage = new Image();
-    bgImage.crossOrigin = "Anonymous"; 
+    // A imagem é um código (Base64), carrega na hora
     bgImage.src = data.image;
 
-    // Tenta carregar a imagem. Se falhar, NÃO TRAVA, apenas marca como não carregada.
-    try {
-        await new Promise((resolve, reject) => {
-            bgImage.onload = () => {
-                imageLoaded = true;
-                resolve();
-            };
-            bgImage.onerror = () => {
-                console.warn("Imagem da IA falhou, usando fundo padrão.");
-                imageLoaded = false; // Falhou, mas seguimos em frente!
-                resolve(); // Resolvemos a promessa mesmo com erro para não travar
-            };
-        });
-    } catch (e) {
-        imageLoaded = false;
-    }
+    await new Promise((resolve) => {
+        bgImage.onload = resolve;
+        bgImage.onerror = resolve; 
+    });
 
     removeSkeleton(index);
 
-    if (imageLoaded) {
-        // Se a imagem carregou, desenha ela
-        ctx.drawImage(bgImage, 0, 0, 1080, 1080);
-        
-        // Degradê suave por cima da foto
-        const rgb = hexToRgb(options.gradientColor);
-        const gradient = ctx.createLinearGradient(0, 0, 0, 750);
-        gradient.addColorStop(0, `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.95)`); 
-        gradient.addColorStop(0.6, `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.6)`);
-        gradient.addColorStop(1, `rgba(${rgb.r},${rgb.g},${rgb.b}, 0)`); 
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 1080, 1080);
-    } else {
-        // === PLANO B: Se a imagem falhar, desenha um fundo abstrato bonito ===
-        const rgb = hexToRgb(options.gradientColor);
-        // Fundo Sólido Escuro
-        ctx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-        ctx.fillRect(0, 0, 1080, 1080);
-        
-        // Efeito de Luz
-        const grad = ctx.createRadialGradient(540, 540, 0, 540, 540, 800);
-        grad.addColorStop(0, options.primaryColor); // Centro brilhante
-        grad.addColorStop(1, `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`); // Bordas escuras
-        ctx.fillStyle = grad;
-        ctx.globalAlpha = 0.3;
-        ctx.fillRect(0, 0, 1080, 1080);
-        ctx.globalAlpha = 1.0;
-    }
+    ctx.drawImage(bgImage, 0, 0, 1080, 1080);
 
-    // Desenha o restante (Texto e Elementos) normalmente
+    const rgb = hexToRgb(options.gradientColor);
+    const gradient = ctx.createLinearGradient(0, 0, 0, 750);
+    gradient.addColorStop(0, `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.95)`); 
+    gradient.addColorStop(0.6, `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.6)`);
+    gradient.addColorStop(1, `rgba(${rgb.r},${rgb.g},${rgb.b}, 0)`); 
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 1080, 1080);
+
     drawProDesignElements(ctx, options.primaryColor);
 
     const { title, sub, handle } = data.textData;
     let titleFont = "900 160px 'Anton'"; let subFont = "700 70px 'Montserrat'";
+    
     if (options.fontStyle === 'modern') { titleFont = "900 150px 'Montserrat'"; subFont = "500 70px 'Roboto'"; }
     else if (options.fontStyle === 'elegant') { titleFont = "700 140px 'Playfair Display'"; subFont = "400 60px 'Montserrat'"; }
     else if (options.fontStyle === 'hand') { titleFont = "700 180px 'Dancing Script'"; subFont = "700 70px 'Montserrat'"; }
@@ -216,7 +182,6 @@ async function createCompositePost(data, index, options) {
     if(window.innerWidth < 900) div.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-// ... (Restante das funções auxiliares: drawTextWithFit, drawProDesignElements, hexToRgb, copyTxt - Mantenha igual)
 function drawTextWithFit(ctx, text, x, y, initialSize, weight, family) {
     const maxWidth = 900; 
     let fontSize = initialSize;
