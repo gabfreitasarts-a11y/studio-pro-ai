@@ -1,24 +1,20 @@
-// script.js - VERSÃO BLINDADA (COM AVISO DE ERRO)
+// script.js - VERSÃO ANTI-FALHA (FALLBACK AUTOMÁTICO)
 
 const ACCESS_PASSWORD = "K92-X4M-PRO-88"; 
 
-// 1. LOGIN
+// 1. SEGURANÇA
 if(localStorage.getItem('studioProAuth') === 'true') {
     document.getElementById('loginOverlay').classList.add('hidden');
     document.getElementById('appContainer').classList.remove('hidden');
 }
 
 function checkPassword() {
-    const input = document.getElementById('passwordInput');
-    const errorMsg = document.getElementById('errorMsg');
-    
-    if(input.value === ACCESS_PASSWORD) {
+    if(document.getElementById('passwordInput').value === ACCESS_PASSWORD) {
         localStorage.setItem('studioProAuth', 'true'); 
         document.getElementById('loginOverlay').classList.add('hidden');
         document.getElementById('appContainer').classList.remove('hidden');
     } else {
-        errorMsg.classList.remove('hidden');
-        input.style.borderColor = "red";
+        document.getElementById('errorMsg').classList.remove('hidden');
     }
 }
 
@@ -30,15 +26,18 @@ document.getElementById('generatorForm').addEventListener('submit', async (e) =>
     
     const btn = document.getElementById('generateBtn');
     const btnText = document.getElementById('btnText');
-    const grid = document.getElementById('resultsGrid');
+    const resultsGrid = document.getElementById('resultsGrid');
     
-    // Trava o botão
     btn.disabled = true;
-    btnText.textContent = "Conectando ao Servidor...";
+    btnText.textContent = "Processando...";
     
-    // Limpa estado vazio
-    if(grid.querySelector('.empty-state')) grid.innerHTML = '';
+    if(resultsGrid.querySelector('.empty-state')) resultsGrid.innerHTML = '';
 
+    // Auto-scroll no celular
+    if(window.innerWidth < 900) {
+        resultsGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    
     const baseData = {
         handle: document.getElementById('handle').value,
         niche: document.getElementById('nicheSelector').value,
@@ -57,47 +56,34 @@ document.getElementById('generatorForm').addEventListener('submit', async (e) =>
     const postsPerWeek = parseInt(document.getElementById('postsPerWeek').value) || 1;
     const totalPosts = weeks * postsPerWeek;
 
-    // Garante fontes carregadas
     await document.fonts.ready;
 
     for (let i = 1; i <= totalPosts; i++) {
-        btnText.textContent = `Gerando Arte ${i}/${totalPosts}...`;
         addSkeleton(i); 
 
         try {
-            // Tenta conectar. Se falhar, vai para o 'catch'
-            // IMPORTANTE: '/api/generate' funciona tanto local quanto no Render
             const response = await fetch('/api/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(baseData)
             });
-
-            // Verifica se o servidor respondeu OK (200)
-            if (!response.ok) {
-                throw new Error(`Erro do Servidor: ${response.status}`);
-            }
-
             const data = await response.json();
 
             if (data.success) {
                 await createCompositePost(data, i, visualOptions);
             } else {
-                throw new Error(data.error || "Erro desconhecido na API");
+                // Se o servidor falhar, remove o esqueleto
+                removeSkeleton(i);
             }
-
         } catch (error) {
-            console.error("ERRO GRAVE:", error);
-            // Mostra o erro no lugar do Skeleton para você ver!
-            showErrorCard(i, error.message);
+            console.error(error);
+            removeSkeleton(i);
         }
     }
 
     btn.disabled = false;
     btnText.textContent = "Gerar Artes";
 });
-
-// --- FUNÇÕES VISUAIS ---
 
 function addSkeleton(index) {
     const grid = document.getElementById('resultsGrid');
@@ -112,7 +98,6 @@ function addSkeleton(index) {
         </div>
     `;
     grid.appendChild(div);
-    if(window.innerWidth < 900) div.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function removeSkeleton(index) {
@@ -120,63 +105,72 @@ function removeSkeleton(index) {
     if (el) el.remove();
 }
 
-function showErrorCard(index, msg) {
-    const el = document.getElementById(`skeleton-${index}`);
-    if (el) {
-        el.innerHTML = `
-            <div style="padding: 20px; text-align: center; color: #ff6b6b;">
-                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 10px;"></i>
-                <p>Falha ao gerar:</p>
-                <small>${msg}</small>
-            </div>
-        `;
-        el.style.border = "1px solid red";
-    }
-}
-
-// --- MONTAGEM CANVAS ---
-
+// 3. MONTAGEM (COM SISTEMA ANTI-FALHA)
 async function createCompositePost(data, index, options) {
     const grid = document.getElementById('resultsGrid');
-    
-    // Cria Canvas
     const canvas = document.createElement('canvas');
     canvas.width = 1080;
     canvas.height = 1080;
     const ctx = canvas.getContext('2d');
 
-    // Carrega Imagem
+    let imageLoaded = false;
     const bgImage = new Image();
-    bgImage.crossOrigin = "Anonymous"; // Crucial para não travar
+    bgImage.crossOrigin = "Anonymous"; 
     bgImage.src = data.image;
 
-    await new Promise((resolve, reject) => {
-        bgImage.onload = resolve;
-        bgImage.onerror = () => reject(new Error("Falha ao baixar imagem da IA"));
-    });
+    // Tenta carregar a imagem. Se falhar, NÃO TRAVA, apenas marca como não carregada.
+    try {
+        await new Promise((resolve, reject) => {
+            bgImage.onload = () => {
+                imageLoaded = true;
+                resolve();
+            };
+            bgImage.onerror = () => {
+                console.warn("Imagem da IA falhou, usando fundo padrão.");
+                imageLoaded = false; // Falhou, mas seguimos em frente!
+                resolve(); // Resolvemos a promessa mesmo com erro para não travar
+            };
+        });
+    } catch (e) {
+        imageLoaded = false;
+    }
 
-    // Remove Skeleton SÓ AGORA que deu tudo certo
     removeSkeleton(index);
 
-    // Desenha Fundo
-    ctx.drawImage(bgImage, 0, 0, 1080, 1080);
+    if (imageLoaded) {
+        // Se a imagem carregou, desenha ela
+        ctx.drawImage(bgImage, 0, 0, 1080, 1080);
+        
+        // Degradê suave por cima da foto
+        const rgb = hexToRgb(options.gradientColor);
+        const gradient = ctx.createLinearGradient(0, 0, 0, 750);
+        gradient.addColorStop(0, `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.95)`); 
+        gradient.addColorStop(0.6, `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.6)`);
+        gradient.addColorStop(1, `rgba(${rgb.r},${rgb.g},${rgb.b}, 0)`); 
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1080, 1080);
+    } else {
+        // === PLANO B: Se a imagem falhar, desenha um fundo abstrato bonito ===
+        const rgb = hexToRgb(options.gradientColor);
+        // Fundo Sólido Escuro
+        ctx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+        ctx.fillRect(0, 0, 1080, 1080);
+        
+        // Efeito de Luz
+        const grad = ctx.createRadialGradient(540, 540, 0, 540, 540, 800);
+        grad.addColorStop(0, options.primaryColor); // Centro brilhante
+        grad.addColorStop(1, `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`); // Bordas escuras
+        ctx.fillStyle = grad;
+        ctx.globalAlpha = 0.3;
+        ctx.fillRect(0, 0, 1080, 1080);
+        ctx.globalAlpha = 1.0;
+    }
 
-    // Degradê
-    const rgb = hexToRgb(options.gradientColor);
-    const gradient = ctx.createLinearGradient(0, 0, 0, 750);
-    gradient.addColorStop(0, `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.95)`); 
-    gradient.addColorStop(0.6, `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.6)`);
-    gradient.addColorStop(1, `rgba(${rgb.r},${rgb.g},${rgb.b}, 0)`); 
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 1080, 1080);
-
-    // Elementos
+    // Desenha o restante (Texto e Elementos) normalmente
     drawProDesignElements(ctx, options.primaryColor);
 
-    // Texto
     const { title, sub, handle } = data.textData;
     let titleFont = "900 160px 'Anton'"; let subFont = "700 70px 'Montserrat'";
-    
     if (options.fontStyle === 'modern') { titleFont = "900 150px 'Montserrat'"; subFont = "500 70px 'Roboto'"; }
     else if (options.fontStyle === 'elegant') { titleFont = "700 140px 'Playfair Display'"; subFont = "400 60px 'Montserrat'"; }
     else if (options.fontStyle === 'hand') { titleFont = "700 180px 'Dancing Script'"; subFont = "700 70px 'Montserrat'"; }
@@ -184,23 +178,19 @@ async function createCompositePost(data, index, options) {
 
     ctx.textAlign = "center";
     
-    // @Handle
     ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 10;
     ctx.fillStyle = "rgba(255,255,255,0.85)";
     ctx.font = `600 35px 'Montserrat', sans-serif`;
     ctx.fillText(handle, 540, 120);
 
-    // Título
     ctx.shadowBlur = 25; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
     ctx.fillStyle = "#FFFFFF";
     drawTextWithFit(ctx, title, 540, 380, 160, "900", titleFont.split("'")[1]);
 
-    // Subtítulo
     ctx.shadowBlur = 10;
     ctx.fillStyle = options.primaryColor; 
     drawTextWithFit(ctx, sub, 540, 460, 70, "700", subFont.split("'")[1]);
 
-    // Finaliza
     const finalImageUrl = canvas.toDataURL('image/jpeg', 0.95);
     
     const div = document.createElement('div');
@@ -226,7 +216,7 @@ async function createCompositePost(data, index, options) {
     if(window.innerWidth < 900) div.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-// Auxiliares
+// ... (Restante das funções auxiliares: drawTextWithFit, drawProDesignElements, hexToRgb, copyTxt - Mantenha igual)
 function drawTextWithFit(ctx, text, x, y, initialSize, weight, family) {
     const maxWidth = 900; 
     let fontSize = initialSize;
@@ -242,17 +232,45 @@ function drawTextWithFit(ctx, text, x, y, initialSize, weight, family) {
 
 function drawProDesignElements(ctx, colorHex) {
     const rgb = hexToRgb(colorHex);
-    const style = Math.floor(Math.random() * 6);
-    ctx.save();
+    const style = Math.floor(Math.random() * 6); 
+    ctx.save(); 
     const rand = (min, max) => Math.random() * (max - min) + min;
 
-    if(style === 0) {
-        ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.15)`;
-        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(rand(200,400),0); ctx.lineTo(0, rand(200,400)); ctx.fill();
+    if (style === 0) { 
+        ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.15)`; 
+        const w1 = rand(200, 400); const h1 = rand(200, 400);
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(w1, 0); ctx.lineTo(0, h1); ctx.fill();
+        ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.3)`; ctx.lineWidth = rand(3, 8);
+        const startX = rand(800, 950); const endY = rand(80, 200);
+        ctx.beginPath(); ctx.moveTo(1080, endY); ctx.lineTo(startX, 0); ctx.lineTo(1080, 0); ctx.closePath(); ctx.stroke();
+    } else if (style === 1) { 
+        ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.25)`; ctx.lineWidth = rand(5, 12); ctx.lineCap = 'round';
+        const cp1y = rand(0, 200); const cp2y = rand(200, 500); const endY = rand(100, 300);
+        ctx.beginPath(); ctx.moveTo(-50, rand(150, 300)); ctx.bezierCurveTo(300, cp1y, 700, cp2y, 1150, endY); ctx.stroke();
+        ctx.strokeStyle = `rgba(255,255,255, 0.1)`; ctx.lineWidth = rand(2, 6);
+        ctx.beginPath(); ctx.moveTo(-50, rand(250, 400)); ctx.bezierCurveTo(300, cp1y + 100, 700, cp2y + 50, 1150, endY + 50); ctx.stroke();
+    } else if (style === 2) { 
+        ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.3)`;
+        const spacing = rand(30, 60); const startX = rand(700, 850); const rows = rand(200, 400);
+        for(let x = startX; x < 1080; x += spacing) {
+            for(let y = 50; y < rows; y += spacing) {
+                if(Math.random() > 0.2) { ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill(); }
+            }
+        }
+    } else if (style === 3) {
+        ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.1)`;
+        const bubbles = Math.floor(rand(3, 6));
+        for(let i=0; i<bubbles; i++) {
+            ctx.beginPath(); ctx.arc(rand(0, 1080), rand(0, 600), rand(50, 200), 0, Math.PI*2); ctx.fill();
+        }
+    } else if (style === 4) {
+        ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.2)`; ctx.lineWidth = 2;
+        for(let i=0; i<15; i++) {
+            const offset = i * 40; ctx.beginPath(); ctx.moveTo(0, 200 + offset); ctx.lineTo(400, 0 + offset); ctx.stroke();
+        }
     } else {
-        // ... (Seu código de estilos anterior funciona aqui, simplifiquei pro exemplo caber)
-        ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.2)`;
-        ctx.fillRect(0,0,1080,20); // Exemplo simples
+        ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.5)`; ctx.lineWidth = 2;
+        ctx.strokeRect(40, 40, 1000, 1000);
     }
     ctx.restore();
 }
